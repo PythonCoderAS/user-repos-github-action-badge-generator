@@ -9,6 +9,7 @@ def main():
         printed_header = False
         repo = environ.get("REPO")
         repo_name = repo.split("/")[1]
+        other = []
         for workflow in workflow_path.iterdir():
             if workflow.suffix == ".yml" and workflow.is_file():
                 with workflow.open() as f:
@@ -29,13 +30,27 @@ def main():
                                     not_excluding_main_branch = "main" not in branches_ignore and "master" not in branches_ignore
                             if on_dict.get("schedule", []):
                                 not_excluding_main_branch = True
+                        name = workflow_dict.get("name", workflow.stem)
                         if not_excluding_main_branch:
                             if not printed_header:
                                 print(f"## [{repo_name}](https://github.com/{repo})")
                                 printed_header = True
-                            name = workflow_dict.get("name", workflow.stem)
                             print(f"[![{name}](https://github.com/{repo}/actions/workflows/{workflow.name}/badge.svg)](https://github.com/{repo}/actions/workflows/{workflow.name})", end=" ")
-        print()
+                        else:
+                            other.append({"name": name, "workflow_file_name": workflow.name})
+        if printed_header:
+            print("\n")
+        if other:
+            if not printed_header:
+                print(f"## [{repo_name}](https://github.com/{repo})")
+                printed_header = True
+            print("### Other Workflows")
+            for workflow in other:
+                name = workflow["name"]
+                workflow_file_name = workflow["workflow_file_name"]
+                print(f"[![{name}](https://github.com/{repo}/actions/workflows/{workflow_file_name}/badge.svg)](https://github.com/{repo}/actions/workflows/{workflow_file_name})", end=" ")
+        if printed_header:
+            print("\n")
 
 if __name__ == "__main__":
     main()
