@@ -10,7 +10,7 @@ def main():
         repo = environ.get("REPO")
         repo_name = repo.split("/")[1]
         other = []
-        for workflow in workflow_path.iterdir():
+        for workflow in sorted(workflow_path.iterdir(), key=lambda f: str(f).lower()):
             if workflow.suffix == ".yml" and workflow.is_file():
                 with workflow.open() as f:
                     workflow_dict = safe_load(f)
